@@ -1,6 +1,5 @@
 package com.kit.todo_litst_api.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
