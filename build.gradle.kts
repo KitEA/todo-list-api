@@ -31,6 +31,11 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 
+	val jjwtVersion = "0.13.0"
+	implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
+
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("org.postgresql:postgresql")
 	annotationProcessor("org.projectlombok:lombok")

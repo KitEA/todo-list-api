@@ -1,6 +1,8 @@
 package com.kit.todo_litst_api.service;
 
 import com.kit.todo_litst_api.config.TestContainerConfig;
+import com.kit.todo_litst_api.dto.AuthResponse;
+import com.kit.todo_litst_api.dto.LoginRequest;
 import com.kit.todo_litst_api.dto.RegisterRequest;
 import com.kit.todo_litst_api.model.User;
 import com.kit.todo_litst_api.model.repository.UserRepository;
@@ -8,13 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Import(TestContainerConfig.class)
@@ -60,10 +63,53 @@ class AuthServiceIntegrationTest {
         RegisterRequest request2 = new RegisterRequest("duplicateUser", "second@example.com", "password456");
 
         // When & Then
-        assertThrows(RuntimeException.class, () -> authService.registerUser(request2));
+        assertThatThrownBy(() -> authService.registerUser(request2))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("Username already exists");
 
         assertThat(userRepository.findAll())
                 .extracting(User::getUsername)
                 .containsOnlyOnce("duplicateUser");
+    }
+
+    @Test
+    void shouldLoginSuccessfully_WhenValidCredentialsProvided() {
+        // Given
+        RegisterRequest registerRequest = new RegisterRequest("loginUser", "login@example.com", "password123");
+        authService.registerUser(registerRequest);
+
+        LoginRequest loginRequest = new LoginRequest("login@example.com", "password123");
+
+        // When
+        AuthResponse response = authService.login(loginRequest);
+
+        // Then
+        assertThat(response).isNotNull();
+        assertThat(response.token()).isNotBlank();
+    }
+
+    @Test
+    void shouldFailLogin_WhenInvalidPasswordProvided() {
+        // Given
+        RegisterRequest registerRequest = new RegisterRequest("wrongPassUser", "wrongpass@example.com", "password123");
+        authService.registerUser(registerRequest);
+
+        LoginRequest loginRequest = new LoginRequest("wrongpass@example.com", "wrongpassword");
+
+        // When & Then
+        assertThatThrownBy(() -> authService.login(loginRequest))
+                .isInstanceOf(BadCredentialsException.class)
+                .hasMessage("Invalid email or password");
+    }
+
+    @Test
+    void shouldFailLogin_WhenUserDoesNotExist() {
+        // Given
+        LoginRequest loginRequest = new LoginRequest("notfound@example.com", "password123");
+
+        // When & Then
+        assertThatThrownBy(() -> authService.login(loginRequest))
+                .isInstanceOf(BadCredentialsException.class)
+                .hasMessage("Invalid email or password");
     }
 }
