@@ -39,7 +39,7 @@ class AuthControllerTest {
     }
 
     @Test
-    void shouldReturn400WhenEmailIsInvalid() throws Exception {
+    void shouldReturn400_WhenEmailIsInvalid() throws Exception {
         var request = new RegisterRequest("user", "not-an-email", "password123");
 
         mockMvc.perform(post("/api/auth/register")
