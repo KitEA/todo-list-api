@@ -14,25 +14,27 @@ import lombok.extern.slf4j.Slf4j;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(BadCredentialsException.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse handleBadCredentials(BadCredentialsException ex) {
         return new ErrorResponse("BAD_CREDENTIALS", ex.getMessage());
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidationError(MethodArgumentNotValidException ex) {
-        String firstError = ex.getBindingResult().getFieldErrors().getFirst().getDefaultMessage();
-        log.warn("Validation failed: {}", firstError);
+        String allErrors = ex.getBindingResult().getFieldErrors().stream()
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .collect(java.util.stream.Collectors.joining(", "));
+        log.warn("Validation failed: {}", allErrors);
 
         return new ErrorResponse(
                 "VALIDATION_ERROR",
-                firstError
+                allErrors
         );
     }
 
-    @ExceptionHandler(UsernameAlreadyExistsException.class)
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleUsernameAlreadyExists(UsernameAlreadyExistsException ex) {
         return new ErrorResponse("USERNAME_ALREADY_EXISTS", ex.getMessage());
