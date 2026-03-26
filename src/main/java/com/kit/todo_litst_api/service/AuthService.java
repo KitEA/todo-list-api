@@ -19,7 +19,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    public void registerUser(RegisterRequest request) {
+    public AuthResponse registerUser(RegisterRequest request) {
         if (userRepository.existsByUsername(request.username())) {
             throw new UsernameAlreadyExistsException("Username already exists");
         }
@@ -31,6 +31,9 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+        
+        String token = jwtService.generateToken(user);
+        return new AuthResponse(token);
     }
 
     public AuthResponse login(LoginRequest request) {

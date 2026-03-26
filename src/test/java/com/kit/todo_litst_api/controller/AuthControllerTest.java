@@ -36,11 +36,15 @@ class AuthControllerTest {
     @Test
     void shouldRegisterUserSuccessfully() throws Exception {
         var request = new RegisterRequest("testuser", "test@example.com", "password123");
+        var response = new AuthResponse("dummy-token");
+
+        when(authService.registerUser(any())).thenReturn(response);
 
         mockMvc.perform(post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.token").value("dummy-token"));
     }
 
     @Test

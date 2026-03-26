@@ -40,9 +40,12 @@ class AuthServiceIntegrationTest {
         RegisterRequest request = new RegisterRequest("testuser", "test@example.com", "password123");
 
         // When
-        authService.registerUser(request);
+        AuthResponse response = authService.registerUser(request);
 
         // Then
+        assertThat(response).isNotNull();
+        assertThat(response.token()).isNotBlank();
+
         Optional<User> savedUserOptional = userRepository.findByUsername("testuser");
         assertThat(savedUserOptional).isPresent();
         

@@ -26,6 +26,9 @@ class AuthServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private JwtService jwtService;
+
     @InjectMocks
     private AuthService authService;
 
@@ -35,9 +38,10 @@ class AuthServiceTest {
         RegisterRequest request = new RegisterRequest("testuser", "test@example.com", "password123");
         when(userRepository.existsByUsername(request.username())).thenReturn(false);
         when(passwordEncoder.encode(request.password())).thenReturn("encodedPassword");
+        when(jwtService.generateToken(any(User.class))).thenReturn("dummy-token");
 
         // When
-        authService.registerUser(request);
+        var response = authService.registerUser(request);
 
         // Then
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
@@ -47,6 +51,9 @@ class AuthServiceTest {
         assertThat(request.username()).isEqualTo(savedUser.getUsername());
         assertThat(request.email()).isEqualTo(savedUser.getEmail());
         assertThat("encodedPassword").isEqualTo(savedUser.getPassword());
+
+        assertThat(response).isNotNull();
+        assertThat(response.token()).isEqualTo("dummy-token");
     }
 
     @Test
