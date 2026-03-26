@@ -1,6 +1,7 @@
 package com.kit.todo_litst_api.service;
 
 import com.kit.todo_litst_api.dto.RegisterRequest;
+import com.kit.todo_litst_api.exception.UsernameAlreadyExistsException;
 import com.kit.todo_litst_api.model.User;
 import com.kit.todo_litst_api.model.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -56,7 +57,7 @@ class AuthServiceTest {
 
         // When & Then
         assertThatThrownBy(() -> authService.registerUser(request))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(UsernameAlreadyExistsException.class)
                 .hasMessage("Username already exists");
         verify(userRepository, never()).save(any());
     }

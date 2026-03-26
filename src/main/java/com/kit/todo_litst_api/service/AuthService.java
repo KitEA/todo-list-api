@@ -3,6 +3,7 @@ package com.kit.todo_litst_api.service;
 import com.kit.todo_litst_api.dto.AuthResponse;
 import com.kit.todo_litst_api.dto.LoginRequest;
 import com.kit.todo_litst_api.dto.RegisterRequest;
+import com.kit.todo_litst_api.exception.UsernameAlreadyExistsException;
 import com.kit.todo_litst_api.model.User;
 import com.kit.todo_litst_api.model.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class AuthService {
 
     public void registerUser(RegisterRequest request) {
         if (userRepository.existsByUsername(request.username())) {
-            throw new RuntimeException("Username already exists");
+            throw new UsernameAlreadyExistsException("Username already exists");
         }
 
         User user = User.builder()

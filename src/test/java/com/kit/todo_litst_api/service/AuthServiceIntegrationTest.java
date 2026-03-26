@@ -4,6 +4,7 @@ import com.kit.todo_litst_api.config.TestContainerConfig;
 import com.kit.todo_litst_api.dto.AuthResponse;
 import com.kit.todo_litst_api.dto.LoginRequest;
 import com.kit.todo_litst_api.dto.RegisterRequest;
+import com.kit.todo_litst_api.exception.UsernameAlreadyExistsException;
 import com.kit.todo_litst_api.model.User;
 import com.kit.todo_litst_api.model.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -64,7 +65,7 @@ class AuthServiceIntegrationTest {
 
         // When & Then
         assertThatThrownBy(() -> authService.registerUser(request2))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(UsernameAlreadyExistsException.class)
                 .hasMessage("Username already exists");
 
         assertThat(userRepository.findAll())
