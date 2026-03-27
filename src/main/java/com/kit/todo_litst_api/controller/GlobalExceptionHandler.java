@@ -1,7 +1,10 @@
 package com.kit.todo_litst_api.controller;
 
 import com.kit.todo_litst_api.dto.ErrorResponse;
+import com.kit.todo_litst_api.dto.ValidationErrorResponse;
 import org.springframework.http.HttpStatus;
+import java.util.Map;
+import java.util.HashMap;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,15 +25,20 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationError(MethodArgumentNotValidException ex) {
-        String allErrors = ex.getBindingResult().getFieldErrors().stream()
-                .map(err -> err.getField() + ": " + err.getDefaultMessage())
-                .collect(java.util.stream.Collectors.joining(", "));
-        log.warn("Validation failed: {}", allErrors);
+    public ValidationErrorResponse handleValidationError(MethodArgumentNotValidException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            String fieldName = error.getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
 
-        return new ErrorResponse(
+        log.warn("Validation failed: {}", errors);
+
+        return new ValidationErrorResponse(
                 "VALIDATION_ERROR",
-                allErrors
+                "One or more fields are invalid",
+                errors
         );
     }
 
