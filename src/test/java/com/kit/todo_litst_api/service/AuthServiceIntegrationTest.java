@@ -13,7 +13,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 
@@ -22,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Import(TestContainerConfig.class)
-@ActiveProfiles("test")
 class AuthServiceIntegrationTest {
 
     @Autowired
@@ -48,7 +46,7 @@ class AuthServiceIntegrationTest {
 
         Optional<User> savedUserOptional = userRepository.findByUsername("testuser");
         assertThat(savedUserOptional).isPresent();
-        
+
         User savedUser = savedUserOptional.get();
         assertThat(savedUser.getUsername()).isEqualTo("testuser");
         assertThat(savedUser.getEmail()).isEqualTo("test@example.com");

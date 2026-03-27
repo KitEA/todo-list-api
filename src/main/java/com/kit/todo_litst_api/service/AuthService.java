@@ -31,7 +31,7 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
-        
+
         String token = jwtService.generateToken(user);
         return new AuthResponse(token);
     }
