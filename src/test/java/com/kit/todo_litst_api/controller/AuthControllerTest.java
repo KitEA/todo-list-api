@@ -1,6 +1,5 @@
 package com.kit.todo_litst_api.controller;
 
-
 import com.kit.todo_litst_api.config.SecurityConfig;
 import com.kit.todo_litst_api.dto.AuthResponse;
 import com.kit.todo_litst_api.dto.LoginRequest;
@@ -41,8 +40,8 @@ class AuthControllerTest {
         when(authService.registerUser(any())).thenReturn(response);
 
         mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.token").value("dummy-token"));
     }
@@ -52,8 +51,28 @@ class AuthControllerTest {
         var request = new RegisterRequest("user", "not-an-email", "password123");
 
         mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturn400_WhenPasswordIsTooSimple() throws Exception {
+        var request = new RegisterRequest("user", "test@example.com", "123");
+
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturn400_WhenUsernameIsBlank() throws Exception {
+        var request = new RegisterRequest("", "test@example.com", "password123");
+
+        mockMvc.perform(post("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -65,9 +84,29 @@ class AuthControllerTest {
         when(authService.login(any())).thenReturn(response);
 
         mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").value("dummy-token"));
+    }
+
+    @Test
+    void shouldReturn400_WhenLoginEmailIsInvalid() throws Exception {
+        var request = new LoginRequest("not-an-email", "password123");
+
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldReturn400_WhenLoginPasswordIsBlank() throws Exception {
+        var request = new LoginRequest("test@example.com", "");
+
+        mockMvc.perform(post("/api/auth/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 }
