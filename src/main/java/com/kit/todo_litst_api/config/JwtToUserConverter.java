@@ -1,6 +1,5 @@
 package com.kit.todo_litst_api.config;
 
-import com.kit.todo_litst_api.model.User;
 import com.kit.todo_litst_api.model.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.converter.Converter;
@@ -19,8 +18,8 @@ public class JwtToUserConverter implements Converter<Jwt, AbstractAuthentication
 
     @Override
     public AbstractAuthenticationToken convert(Jwt jwt) {
-        String email = jwt.getSubject();
-        User user = userRepository.findByEmail(email)
+        var email = jwt.getSubject();
+        var user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found for email: " + email));
         return new UsernamePasswordAuthenticationToken(user, jwt, Collections.emptyList());
     }

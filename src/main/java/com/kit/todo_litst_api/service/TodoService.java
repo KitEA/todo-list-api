@@ -15,7 +15,7 @@ public class TodoService {
     private final TodoRepository todoRepository;
 
     public TodoResponse createTodo(TodoRequest request, User user) {
-        Todo todo = Todo.builder()
+        var todo = Todo.builder()
                 .title(request.title())
                 .description(request.description())
                 .user(user)

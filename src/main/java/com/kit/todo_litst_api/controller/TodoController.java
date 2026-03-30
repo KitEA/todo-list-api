@@ -22,7 +22,7 @@ public class TodoController {
             @Valid @RequestBody TodoRequest request,
             @AuthenticationPrincipal User user
     ) {
-        TodoResponse response = todoService.createTodo(request, user);
+        var response = todoService.createTodo(request, user);
         return ResponseEntity.ok(response);
     }
 }
