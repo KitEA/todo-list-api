@@ -1,5 +1,7 @@
 package com.kit.todo_litst_api.controller;
 
+import com.kit.todo_litst_api.dto.AuthResponse;
+import com.kit.todo_litst_api.dto.LoginRequest;
 import com.kit.todo_litst_api.dto.RegisterRequest;
 import com.kit.todo_litst_api.service.AuthService;
 import jakarta.validation.Valid;
@@ -16,7 +18,12 @@ public class AuthController {
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public void register(@Valid @RequestBody RegisterRequest request) {
-        authService.registerUser(request);
+    public AuthResponse register(@Valid @RequestBody RegisterRequest request) {
+        return authService.registerUser(request);
+    }
+
+    @PostMapping("/login")
+    public AuthResponse login(@Valid @RequestBody LoginRequest request) {
+        return authService.login(request);
     }
 }
