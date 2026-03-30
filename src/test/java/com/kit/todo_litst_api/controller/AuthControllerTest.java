@@ -1,10 +1,14 @@
 package com.kit.todo_litst_api.controller;
 
+import com.kit.todo_litst_api.config.CustomAuthenticationEntryPoint;
+import com.kit.todo_litst_api.config.JwtAuthenticationFilter;
 import com.kit.todo_litst_api.config.SecurityConfig;
 import com.kit.todo_litst_api.dto.AuthResponse;
 import com.kit.todo_litst_api.dto.LoginRequest;
 import com.kit.todo_litst_api.dto.RegisterRequest;
+import com.kit.todo_litst_api.model.repository.UserRepository;
 import com.kit.todo_litst_api.service.AuthService;
+import com.kit.todo_litst_api.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
@@ -21,13 +25,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, JwtAuthenticationFilter.class, CustomAuthenticationEntryPoint.class})
 class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
     AuthService authService;
+
+    @MockitoBean
+    JwtService jwtService;
+
+    @MockitoBean
+    UserRepository userRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
