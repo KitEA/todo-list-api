@@ -3,6 +3,7 @@ package com.kit.todo_litst_api.service;
 import com.kit.todo_litst_api.model.User;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.MacAlgorithm;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -21,30 +22,14 @@ public class JwtService {
 
     public String generateToken(User user) {
         long expirationTime = 1000 * 60 * 60 * 24; // 24 hours
+        MacAlgorithm alg = Jwts.SIG.HS256;
         return Jwts.builder()
                 .subject(user.getEmail())
                 .claim("username", user.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(key)
+                .signWith(key, alg)
                 .compact();
     }
-
-    public String extractEmail(String token) {
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload()
-                .getSubject();
-    }
-
-    public boolean isTokenValid(String token) {
-        try {
-            Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
 }
+

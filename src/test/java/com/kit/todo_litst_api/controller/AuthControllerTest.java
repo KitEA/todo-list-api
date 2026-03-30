@@ -1,7 +1,6 @@
 package com.kit.todo_litst_api.controller;
 
-import com.kit.todo_litst_api.config.CustomAuthenticationEntryPoint;
-import com.kit.todo_litst_api.config.JwtAuthenticationFilter;
+import com.kit.todo_litst_api.config.JwtToUserConverter;
 import com.kit.todo_litst_api.config.SecurityConfig;
 import com.kit.todo_litst_api.dto.AuthResponse;
 import com.kit.todo_litst_api.dto.LoginRequest;
@@ -14,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
@@ -25,16 +25,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AuthController.class)
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class, CustomAuthenticationEntryPoint.class})
+@Import({SecurityConfig.class, JwtToUserConverter.class, JwtService.class})
+@TestPropertySource(properties = "jwt.secret=this-is-a-very-long-secret-key-for-testing-purposes")
 class AuthControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
     AuthService authService;
-
-    @MockitoBean
-    JwtService jwtService;
 
     @MockitoBean
     UserRepository userRepository;

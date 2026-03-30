@@ -1,19 +1,19 @@
 package com.kit.todo_litst_api.controller;
 
-import com.kit.todo_litst_api.config.CustomAuthenticationEntryPoint;
-import com.kit.todo_litst_api.config.JwtAuthenticationFilter;
+import com.kit.todo_litst_api.config.JwtToUserConverter;
 import com.kit.todo_litst_api.config.SecurityConfig;
 import com.kit.todo_litst_api.dto.TodoRequest;
 import com.kit.todo_litst_api.dto.TodoResponse;
 import com.kit.todo_litst_api.model.User;
+import com.kit.todo_litst_api.model.repository.UserRepository;
 import com.kit.todo_litst_api.service.JwtService;
 import com.kit.todo_litst_api.service.TodoService;
-import com.kit.todo_litst_api.model.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
@@ -27,7 +27,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TodoController.class)
-@Import({SecurityConfig.class, JwtAuthenticationFilter.class, CustomAuthenticationEntryPoint.class})
+@Import({SecurityConfig.class, JwtToUserConverter.class, JwtService.class})
+@TestPropertySource(properties = "jwt.secret=this-is-a-very-long-secret-key-for-testing-purposes")
 class TodoControllerTest {
 
     @Autowired
@@ -36,11 +37,11 @@ class TodoControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockitoBean
-    private TodoService todoService;
+    @Autowired
+    private JwtService jwtService;
 
     @MockitoBean
-    private JwtService jwtService;
+    private TodoService todoService;
 
     @MockitoBean
     private UserRepository userRepository;
@@ -60,14 +61,14 @@ class TodoControllerTest {
         var request = new TodoRequest("Buy groceries", "Buy milk, eggs, and bread");
         var response = new TodoResponse(1L, "Buy groceries", "Buy milk, eggs, and bread");
 
-        when(jwtService.isTokenValid("valid-token")).thenReturn(true);
-        when(jwtService.extractEmail("valid-token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
         when(todoService.createTodo(any(), any())).thenReturn(response);
 
+        var token = jwtService.generateToken(user);
+
         mockMvc.perform(post("/todos")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer valid-token")
+                .header("Authorization", "Bearer " + token)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
@@ -82,22 +83,18 @@ class TodoControllerTest {
         mockMvc.perform(post("/todos")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value("Unauthorized"));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void shouldReturn401_WhenTokenIsInvalid() throws Exception {
         var request = new TodoRequest("Buy groceries", "Buy milk, eggs, and bread");
 
-        when(jwtService.isTokenValid("invalid-token")).thenReturn(false);
-
         mockMvc.perform(post("/todos")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer invalid-token")
+                .header("Authorization", "Bearer this.is.not.a.valid.token")
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value("Unauthorized"));
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -105,13 +102,13 @@ class TodoControllerTest {
         var user = testUser();
         var request = new TodoRequest("", "Some description");
 
-        when(jwtService.isTokenValid("valid-token")).thenReturn(true);
-        when(jwtService.extractEmail("valid-token")).thenReturn("test@example.com");
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+
+        var token = jwtService.generateToken(user);
 
         mockMvc.perform(post("/todos")
                 .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer valid-token")
+                .header("Authorization", "Bearer " + token)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
