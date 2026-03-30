@@ -33,10 +33,10 @@ class AuthServiceIntegrationTest {
     @Test
     void shouldCreateUserInDatabase() {
         // Given
-        RegisterRequest request = new RegisterRequest("testuser", "test@example.com", "password123");
+        var request = new RegisterRequest("testuser", "test@example.com", "password123");
 
         // When
-        AuthResponse response = authService.registerUser(request);
+        var response = authService.registerUser(request);
 
         // Then
         assertThat(response).isNotNull();
@@ -55,10 +55,10 @@ class AuthServiceIntegrationTest {
     @Test
     void shouldFail_WhenUsernameAlreadyExists() {
         // Given
-        RegisterRequest request1 = new RegisterRequest("duplicateUser", "first@example.com", "password123");
+        var request1 = new RegisterRequest("duplicateUser", "first@example.com", "password123");
         authService.registerUser(request1);
 
-        RegisterRequest request2 = new RegisterRequest("duplicateUser", "second@example.com", "password456");
+        var request2 = new RegisterRequest("duplicateUser", "second@example.com", "password456");
 
         // When & Then
         assertThatThrownBy(() -> authService.registerUser(request2))
@@ -73,10 +73,10 @@ class AuthServiceIntegrationTest {
     @Test
     void shouldLoginSuccessfully_WhenValidCredentialsProvided() {
         // Given
-        RegisterRequest registerRequest = new RegisterRequest("loginUser", "login@example.com", "password123");
+        var registerRequest = new RegisterRequest("loginUser", "login@example.com", "password123");
         authService.registerUser(registerRequest);
 
-        LoginRequest loginRequest = new LoginRequest("login@example.com", "password123");
+        var loginRequest = new LoginRequest("login@example.com", "password123");
 
         // When
         AuthResponse response = authService.login(loginRequest);
@@ -89,10 +89,10 @@ class AuthServiceIntegrationTest {
     @Test
     void shouldFailLogin_WhenInvalidPasswordProvided() {
         // Given
-        RegisterRequest registerRequest = new RegisterRequest("wrongPassUser", "wrongpass@example.com", "password123");
+        var registerRequest = new RegisterRequest("wrongPassUser", "wrongpass@example.com", "password123");
         authService.registerUser(registerRequest);
 
-        LoginRequest loginRequest = new LoginRequest("wrongpass@example.com", "wrongpassword");
+        var loginRequest = new LoginRequest("wrongpass@example.com", "wrongpassword");
 
         // When & Then
         assertThatThrownBy(() -> authService.login(loginRequest))
@@ -103,7 +103,7 @@ class AuthServiceIntegrationTest {
     @Test
     void shouldFailLogin_WhenUserDoesNotExist() {
         // Given
-        LoginRequest loginRequest = new LoginRequest("notfound@example.com", "password123");
+        var loginRequest = new LoginRequest("notfound@example.com", "password123");
 
         // When & Then
         assertThatThrownBy(() -> authService.login(loginRequest))

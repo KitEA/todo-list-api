@@ -24,7 +24,7 @@ public class AuthService {
             throw new UsernameAlreadyExistsException("Username already exists");
         }
 
-        User user = User.builder()
+        var user = User.builder()
                 .username(request.username())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
@@ -32,19 +32,19 @@ public class AuthService {
 
         userRepository.save(user);
 
-        String token = jwtService.generateToken(user);
+        var token = jwtService.generateToken(user);
         return new AuthResponse(token);
     }
 
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.email())
+        var user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
 
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new BadCredentialsException("Invalid email or password");
         }
 
-        String token = jwtService.generateToken(user);
+        var token = jwtService.generateToken(user);
         return new AuthResponse(token);
     }
 }
