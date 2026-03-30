@@ -14,8 +14,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -44,16 +42,14 @@ class AuthServiceIntegrationTest {
         assertThat(response).isNotNull();
         assertThat(response.token()).isNotBlank();
 
-        Optional<User> savedUserOptional = userRepository.findByUsername("testuser");
-        assertThat(savedUserOptional).isPresent();
-
-        User savedUser = savedUserOptional.get();
-        assertThat(savedUser.getUsername()).isEqualTo("testuser");
-        assertThat(savedUser.getEmail()).isEqualTo("test@example.com");
-
-        assertThat(savedUser.getPassword()).isNotEqualTo("password123");
-        assertThat(savedUser.getPassword()).startsWith("$2");
-        assertThat(passwordEncoder.matches("password123", savedUser.getPassword())).isTrue();
+        var savedUser = userRepository.findByUsername("testuser");
+        assertThat(savedUser).hasValueSatisfying(it -> {
+            assertThat(it.getUsername()).isEqualTo("testuser");
+            assertThat(it.getEmail()).isEqualTo("test@example.com");
+            assertThat(it.getPassword()).isNotEqualTo("password123");
+            assertThat(it.getPassword()).startsWith("$2");
+            assertThat(passwordEncoder.matches("password123", it.getPassword())).isTrue();
+        });
     }
 
     @Test

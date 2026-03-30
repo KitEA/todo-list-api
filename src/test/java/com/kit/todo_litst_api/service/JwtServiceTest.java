@@ -58,6 +58,7 @@ class JwtServiceTest {
     @Test
     void shouldFailOnExpiredToken() {
         // Given
+        var parser = Jwts.parser().verifyWith(key).build();
         String expiredToken = Jwts.builder()
                 .subject("test@example.com")
                 .issuedAt(new Date(System.currentTimeMillis() - 10000))
@@ -66,26 +67,21 @@ class JwtServiceTest {
                 .compact();
 
         // When & Then
-        assertThatThrownBy(() -> Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(expiredToken))
+        assertThatThrownBy(() -> parser.parseSignedClaims(expiredToken))
                 .isInstanceOf(ExpiredJwtException.class);
     }
 
     @Test
     void shouldFailOnInvalidTokenSignature() {
         // Given
+        var parser = Jwts.parser().verifyWith(key).build();
         User user = User.builder().id(1L).email("test@example.com").build();
         String token = jwtService.generateToken(user);
 
         String tamperedToken = token.substring(0, token.length() - 5) + "XXXXX";
 
         // When & Then
-        assertThatThrownBy(() -> Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(tamperedToken))
+        assertThatThrownBy(() -> parser.parseSignedClaims(tamperedToken))
                 .isInstanceOf(SignatureException.class);
     }
 }
