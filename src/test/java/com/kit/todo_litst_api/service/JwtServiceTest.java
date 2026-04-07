@@ -50,8 +50,7 @@ class JwtServiceTest {
                 .parseSignedClaims(token)
                 .getPayload();
 
-        assertThat(claims.getSubject()).isEqualTo("testuser@example.com");
-        assertThat(claims.get("username")).isEqualTo("testuser");
+        assertThat(claims.getSubject()).isEqualTo("4");
     }
 
     @Test

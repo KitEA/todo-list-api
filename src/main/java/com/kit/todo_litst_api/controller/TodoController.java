@@ -20,8 +20,7 @@ public class TodoController {
     @PostMapping
     public ResponseEntity<TodoResponse> createTodo(
             @Valid @RequestBody TodoRequest request,
-            @AuthenticationPrincipal User user
-    ) {
+            @AuthenticationPrincipal User user) {
         var response = todoService.createTodo(request, user);
         return ResponseEntity.ok(response);
     }

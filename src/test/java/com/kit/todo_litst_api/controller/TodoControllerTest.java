@@ -18,8 +18,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
-import java.util.Optional;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -60,7 +58,7 @@ class TodoControllerTest {
         var request = new TodoRequest("Buy groceries", "Buy milk, eggs, and bread");
         var response = new TodoResponse(1L, "Buy groceries", "Buy milk, eggs, and bread");
 
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.getReferenceById(1L)).thenReturn(user);
         when(todoService.createTodo(any(), any())).thenReturn(response);
 
         var token = jwtService.generateToken(user);
@@ -101,7 +99,7 @@ class TodoControllerTest {
         var user = testUser();
         var request = new TodoRequest("", "Some description");
 
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
+        when(userRepository.getReferenceById(1L)).thenReturn(user);
 
         var token = jwtService.generateToken(user);
 

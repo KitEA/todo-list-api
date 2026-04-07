@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 
+/**
+ * Converts the JwtObject into User object for use in SecurityContext
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtToUserConverter implements Converter<Jwt, AbstractAuthenticationToken> {
@@ -18,9 +21,9 @@ public class JwtToUserConverter implements Converter<Jwt, AbstractAuthentication
 
     @Override
     public AbstractAuthenticationToken convert(Jwt jwt) {
-        var email = jwt.getSubject();
-        var user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found for email: " + email));
+        Long userId = Long.parseLong(jwt.getSubject());
+        
+        var user = userRepository.getReferenceById(userId);
         return new UsernamePasswordAuthenticationToken(user, jwt, Collections.emptyList());
     }
 }

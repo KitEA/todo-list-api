@@ -29,6 +29,10 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Determines how to cryptographically verify or parse specific token
+     * converts the raw string into stuctured JwtObject
+     */
     @Bean
     public JwtDecoder jwtDecoder(@Value("${jwt.secret}") String secret) {
         var key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
@@ -36,18 +40,18 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/error").permitAll()
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
+                // Triggers JwtDecoder at some point in the process
+                // converts the JwtObject into User object using jwtToUserConverter
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtToUserConverter))
-                );
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtToUserConverter)));
 
         return http.build();
     }

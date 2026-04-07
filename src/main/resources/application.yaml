@@ -3,6 +3,8 @@ spring:
     name: todo-litst-api
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+  mvc:
+    publish-request-handled-events: false
 
 jwt:
   secret: ${JWT_SECRET:this-is-a-very-long-secret-key-for-testing-purposes}
