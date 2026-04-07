@@ -1,10 +1,8 @@
 spring:
   application:
     name: todo-litst-api
-  config:
-    import: optional:file:.env[.properties]
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:this-is-a-very-long-secret-key-for-testing-purposes}
