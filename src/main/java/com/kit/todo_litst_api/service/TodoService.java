@@ -21,8 +21,8 @@ public class TodoService {
                 .user(user)
                 .build();
 
-        todo = todoRepository.save(todo);
+        var savedTodo = todoRepository.save(todo);
 
-        return new TodoResponse(todo.getId(), todo.getTitle(), todo.getDescription());
+        return TodoResponse.mapEntityToDto(savedTodo);
     }
 }

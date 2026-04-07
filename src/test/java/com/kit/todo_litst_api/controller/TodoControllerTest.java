@@ -28,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(TodoController.class)
 @Import({SecurityConfig.class, JwtToUserConverter.class, JwtService.class})
-
 class TodoControllerTest {
 
     @Autowired
