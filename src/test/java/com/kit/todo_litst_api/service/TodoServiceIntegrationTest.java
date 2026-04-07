@@ -36,7 +36,7 @@ class TodoServiceIntegrationTest {
         var request = new TodoRequest("Buy groceries", "Buy milk, eggs, and bread");
 
         // When
-        var response = todoService.createTodo(request, user);
+        var response = todoService.createTodo(request, user.getId());
 
         // Then
         assertThat(response.id()).isNotNull();
@@ -60,8 +60,8 @@ class TodoServiceIntegrationTest {
         var userB = userRepository.findByEmail("userB@example.com").orElseThrow();
 
         // When
-        var responseA = todoService.createTodo(new TodoRequest("User A's task", null), userA);
-        var responseB = todoService.createTodo(new TodoRequest("User B's task", null), userB);
+        var responseA = todoService.createTodo(new TodoRequest("User A's task", null), userA.getId());
+        var responseB = todoService.createTodo(new TodoRequest("User B's task", null), userB.getId());
 
         // Then
         var todoA = todoRepository.findById(responseA.id()).orElseThrow();
@@ -80,7 +80,7 @@ class TodoServiceIntegrationTest {
         var request = new TodoRequest("No description task", null);
 
         // When
-        var response = todoService.createTodo(request, user);
+        var response = todoService.createTodo(request, user.getId());
 
         // Then
         assertThat(response.title()).isEqualTo("No description task");

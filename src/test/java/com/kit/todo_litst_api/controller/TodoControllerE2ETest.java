@@ -45,7 +45,7 @@ class TodoControllerE2ETest {
                 .header("Authorization", "Bearer " + jwtToken)
                 .body(todoRequest)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectBody()
                 .jsonPath("$.title").isEqualTo("Wash Cloth")
                 .jsonPath("$.id").exists();
