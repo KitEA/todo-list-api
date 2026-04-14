@@ -21,12 +21,13 @@ public class JwtService {
 
     public String generateToken(User user) {
         long expirationTime = 1000 * 60 * 60 * 24; // 24 hours
+        var alg = Jwts.SIG.HS256;
         return Jwts.builder()
-                .subject(user.getEmail())
-                .claim("username", user.getUsername())
+                .subject(user.getId().toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expirationTime))
-                .signWith(key)
+                .signWith(key, alg)
                 .compact();
     }
 }
+

@@ -1,7 +1,6 @@
 package com.kit.todo_litst_api.service;
 
 import com.kit.todo_litst_api.model.User;
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -24,7 +23,7 @@ class JwtServiceTest {
 
     @BeforeEach
     void setUp() {
-        String secretKeyString = "this-is-a-very-long-secret-key-for-testing-purposes";
+        var secretKeyString = "this-is-a-very-long-secret-key-for-testing-purposes";
         jwtService = new JwtService(secretKeyString);
         key = Keys.hmacShaKeyFor(secretKeyString.getBytes(StandardCharsets.UTF_8));
     }
@@ -32,7 +31,7 @@ class JwtServiceTest {
     @Test
     void shouldGenerateValidToken() {
         // Given
-        User user = User.builder()
+        var user = User.builder()
                 .id(4L)
                 .email("testuser@example.com")
                 .password("1234")
@@ -40,26 +39,25 @@ class JwtServiceTest {
                 .build();
 
         // When
-        String token = jwtService.generateToken(user);
+        var token = jwtService.generateToken(user);
 
         // Then
         assertThat(token).isNotBlank();
 
-        Claims claims = Jwts.parser()
+        var claims = Jwts.parser()
                 .verifyWith(key)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
 
-        assertThat(claims.getSubject()).isEqualTo("testuser@example.com");
-        assertThat(claims.get("username")).isEqualTo("testuser");
+        assertThat(claims.getSubject()).isEqualTo("4");
     }
 
     @Test
     void shouldFailOnExpiredToken() {
         // Given
         var parser = Jwts.parser().verifyWith(key).build();
-        String expiredToken = Jwts.builder()
+        var expiredToken = Jwts.builder()
                 .subject("test@example.com")
                 .issuedAt(new Date(System.currentTimeMillis() - 10000))
                 .expiration(new Date(System.currentTimeMillis() - 5000))
@@ -75,10 +73,10 @@ class JwtServiceTest {
     void shouldFailOnInvalidTokenSignature() {
         // Given
         var parser = Jwts.parser().verifyWith(key).build();
-        User user = User.builder().id(1L).email("test@example.com").build();
-        String token = jwtService.generateToken(user);
+        var user = User.builder().id(1L).email("test@example.com").build();
+        var token = jwtService.generateToken(user);
 
-        String tamperedToken = token.substring(0, token.length() - 5) + "XXXXX";
+        var tamperedToken = token.substring(0, token.length() - 5) + "XXXXX";
 
         // When & Then
         assertThatThrownBy(() -> parser.parseSignedClaims(tamperedToken))
