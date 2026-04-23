@@ -1,8 +1,10 @@
 package com.kit.todo_litst_api.controller;
 
 import com.kit.todo_litst_api.config.TestContainerConfig;
+import com.kit.todo_litst_api.dto.AuthResponse;
 import com.kit.todo_litst_api.dto.RegisterRequest;
 import com.kit.todo_litst_api.dto.TodoRequest;
+import com.kit.todo_litst_api.dto.TodoResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
@@ -10,8 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.client.RestTestClient;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.Objects;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureRestTestClient
@@ -30,23 +31,39 @@ class TodoControllerE2ETest {
                 .body(registerRequest)
                 .exchange()
                 .expectStatus().isCreated()
-                .expectBody(Map.class)
+                .expectBody(AuthResponse.class)
                 .returnResult()
                 .getResponseBody();
 
-        String jwtToken = Optional.ofNullable(registerResponse)
-                .map(res -> (String) res.get("token"))
-                .orElseThrow(() -> new AssertionError("Token not found in response"));
+        String jwtToken = Objects.requireNonNull(registerResponse).token();
 
         var todoRequest = new TodoRequest("Wash Cloth", "");
 
-        restTestClient.post().uri("/api/todos")
+        var todoResponse = restTestClient.post().uri("/api/todos")
                 .header("Authorization", "Bearer " + jwtToken)
                 .body(todoRequest)
                 .exchange()
                 .expectStatus().isCreated()
+                .expectBody(TodoResponse.class)
+                .returnResult()
+                .getResponseBody();
+
+        Long todoId = Objects.requireNonNull(todoResponse).id();
+
+        var updateRequest = new TodoRequest("Wash Cloth (Updated)", "Added soap and water");
+
+        restTestClient.put().uri("/api/todos/{id}", todoId)
+                .header("Authorization", "Bearer " + jwtToken)
+                .body(updateRequest)
+                .exchange()
+                .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.title").isEqualTo("Wash Cloth")
-                .jsonPath("$.id").exists();
+                .jsonPath("$.title").isEqualTo("Wash Cloth (Updated)")
+                .jsonPath("$.description").isEqualTo("Added soap and water");
+
+        restTestClient.delete().uri("/api/todos/{id}", todoId)
+                .header("Authorization", "Bearer " + jwtToken)
+                .exchange()
+                .expectStatus().isNoContent();
     }
 }

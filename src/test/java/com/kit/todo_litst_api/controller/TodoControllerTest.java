@@ -20,7 +20,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -108,5 +108,39 @@ class TodoControllerTest {
                 .header("Authorization", "Bearer " + token)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void shouldUpdateTodo_WhenValidTokenProvided() throws Exception {
+        var user = testUser();
+        var request = new TodoRequest("Updated Title", "Updated Description");
+        var response = new TodoResponse(1L, "Updated Title", "Updated Description");
+
+        when(userRepository.getReferenceById(1L)).thenReturn(user);
+        when(todoService.updateTodo(any(), any(), any())).thenReturn(response);
+
+        var token = jwtService.generateToken(user);
+
+        mockMvc.perform(put("/api/todos/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + token)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.title").value("Updated Title"))
+                .andExpect(jsonPath("$.description").value("Updated Description"));
+    }
+
+    @Test
+    void shouldDeleteTodo_WhenValidTokenProvided() throws Exception {
+        var user = testUser();
+
+        when(userRepository.getReferenceById(1L)).thenReturn(user);
+
+        var token = jwtService.generateToken(user);
+
+        mockMvc.perform(delete("/api/todos/1")
+                .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
     }
 }

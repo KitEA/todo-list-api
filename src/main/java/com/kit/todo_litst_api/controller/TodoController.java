@@ -23,4 +23,20 @@ public class TodoController {
             @AuthenticationPrincipal Long userId) {
         return todoService.createTodo(request, userId);
     }
+
+    @PutMapping("/{id}")
+    public TodoResponse updateTodo(
+            @PathVariable Long id,
+            @Valid @RequestBody TodoRequest request,
+            @AuthenticationPrincipal Long userId) {
+        return todoService.updateTodo(id, request, userId);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTodo(
+            @PathVariable Long id,
+            @AuthenticationPrincipal Long userId) {
+        todoService.deleteTodo(id, userId);
+    }
 }

@@ -86,4 +86,40 @@ class TodoServiceIntegrationTest {
         assertThat(response.title()).isEqualTo("No description task");
         assertThat(response.description()).isNull();
     }
+
+    @Test
+    void shouldUpdateTodo() {
+        // Given
+        authService.registerUser(new RegisterRequest("updateUser", "update@example.com", "password123"));
+        var user = userRepository.findByEmail("update@example.com").orElseThrow();
+        var createResponse = todoService.createTodo(new TodoRequest("Old Title", "Old Desc"), user.getId());
+
+        // When
+        var updateRequest = new TodoRequest("New Title", "New Desc");
+        var response = todoService.updateTodo(createResponse.id(), updateRequest, user.getId());
+
+        // Then
+        assertThat(response.id()).isEqualTo(createResponse.id());
+        assertThat(response.title()).isEqualTo("New Title");
+        assertThat(response.description()).isEqualTo("New Desc");
+
+        var updatedTodo = todoRepository.findById(response.id()).orElseThrow();
+        assertThat(updatedTodo.getTitle()).isEqualTo("New Title");
+        assertThat(updatedTodo.getDescription()).isEqualTo("New Desc");
+    }
+
+    @Test
+    void shouldDeleteTodo() {
+        // Given
+        authService.registerUser(new RegisterRequest("deleteUser", "delete@example.com", "password123"));
+        var user = userRepository.findByEmail("delete@example.com").orElseThrow();
+        var createResponse = todoService.createTodo(new TodoRequest("To be deleted", "Desc"), user.getId());
+
+        // When
+        todoService.deleteTodo(createResponse.id(), user.getId());
+
+        // Then
+        var deletedTodo = todoRepository.findById(createResponse.id());
+        assertThat(deletedTodo).isEmpty();
+    }
 }
