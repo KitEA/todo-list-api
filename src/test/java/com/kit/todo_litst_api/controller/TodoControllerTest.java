@@ -2,6 +2,7 @@ package com.kit.todo_litst_api.controller;
 
 import com.kit.todo_litst_api.config.JwtToUserConverter;
 import com.kit.todo_litst_api.config.SecurityConfig;
+import com.kit.todo_litst_api.dto.PaginatedResponse;
 import com.kit.todo_litst_api.dto.TodoRequest;
 import com.kit.todo_litst_api.dto.TodoResponse;
 import com.kit.todo_litst_api.model.User;
@@ -17,6 +18,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
+
+import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -71,6 +74,29 @@ class TodoControllerTest {
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.title").value("Buy groceries"))
                 .andExpect(jsonPath("$.description").value("Buy milk, eggs, and bread"));
+    }
+
+    @Test
+    void shouldGetTodos_WhenValidTokenProvided() throws Exception {
+        var user = testUser();
+        var response = new TodoResponse(1L, "Buy groceries", "Buy milk, eggs, and bread");
+        var paginatedResponse = new PaginatedResponse<>(List.of(response), 1, 10, 1L);
+
+        when(userRepository.getReferenceById(1L)).thenReturn(user);
+        when(todoService.getTodos(1L, 1, 10)).thenReturn(paginatedResponse);
+
+        var token = jwtService.generateToken(user);
+
+        mockMvc.perform(get("/api/todos")
+                .param("page", "1")
+                .param("limit", "10")
+                .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].id").value(1))
+                .andExpect(jsonPath("$.data[0].title").value("Buy groceries"))
+                .andExpect(jsonPath("$.page").value(1))
+                .andExpect(jsonPath("$.limit").value(10))
+                .andExpect(jsonPath("$.total").value(1));
     }
 
     @Test

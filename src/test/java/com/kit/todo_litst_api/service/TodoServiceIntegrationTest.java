@@ -122,4 +122,24 @@ class TodoServiceIntegrationTest {
         var deletedTodo = todoRepository.findById(createResponse.id());
         assertThat(deletedTodo).isEmpty();
     }
+
+    @Test
+    void shouldGetPaginatedTodos() {
+        // Given
+        authService.registerUser(new RegisterRequest("paginateUser", "paginate@example.com", "password123"));
+        var user = userRepository.findByEmail("paginate@example.com").orElseThrow();
+        for (int i = 0; i < 15; i++) {
+            todoService.createTodo(new TodoRequest("Task " + i, "Desc"), user.getId());
+        }
+
+        // When
+        var response = todoService.getTodos(user.getId(), 2, 10);
+
+        // Then
+        assertThat(response.page()).isEqualTo(2);
+        assertThat(response.limit()).isEqualTo(10);
+        assertThat(response.total()).isEqualTo(15);
+        assertThat(response.data()).hasSize(5);
+        assertThat(response.data().getFirst().title()).startsWith("Task");
+    }
 }

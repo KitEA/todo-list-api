@@ -61,6 +61,16 @@ class TodoControllerE2ETest {
                 .jsonPath("$.title").isEqualTo("Wash Cloth (Updated)")
                 .jsonPath("$.description").isEqualTo("Added soap and water");
 
+        restTestClient.get().uri("/api/todos?page=1&limit=5")
+                .header("Authorization", "Bearer " + jwtToken)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.page").isEqualTo(1)
+                .jsonPath("$.limit").isEqualTo(5)
+                .jsonPath("$.total").isEqualTo(1)
+                .jsonPath("$.data[0].id").isEqualTo(todoId.intValue());
+
         restTestClient.delete().uri("/api/todos/{id}", todoId)
                 .header("Authorization", "Bearer " + jwtToken)
                 .exchange()

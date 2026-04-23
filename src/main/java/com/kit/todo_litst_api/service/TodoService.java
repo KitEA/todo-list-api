@@ -1,6 +1,8 @@
 package com.kit.todo_litst_api.service;
 
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import com.kit.todo_litst_api.dto.PaginatedResponse;
 import com.kit.todo_litst_api.dto.TodoRequest;
 import com.kit.todo_litst_api.dto.TodoResponse;
 import com.kit.todo_litst_api.model.Todo;
@@ -19,6 +21,13 @@ public class TodoService {
 
     private final TodoRepository todoRepository;
     private final UserRepository userRepository;
+
+    public PaginatedResponse<TodoResponse> getTodos(Long userId, int page, int limit) {
+        var pageRequest = PageRequest.of(page - 1, limit);
+        var todoPage = todoRepository.findByUserId(userId, pageRequest);
+        
+        return new PaginatedResponse<>(todoPage.getContent(), page, limit, todoPage.getTotalElements());
+    }
 
     public TodoResponse createTodo(TodoRequest request, Long userId) {
         var user = userRepository.getReferenceById(userId);
