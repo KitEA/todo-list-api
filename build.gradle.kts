@@ -33,6 +33,7 @@ dependencies {
 
 	compileOnly(libs.lombok)
 	runtimeOnly(libs.postgresql)
+	runtimeOnly(libs.ehcache)
 	annotationProcessor(libs.lombok)
 
 	testImplementation(libs.bundles.spring.boot.starters.test)
