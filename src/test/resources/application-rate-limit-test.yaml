@@ -1,9 +1,3 @@
-spring:
-  application:
-    name: todo-litst-api
-  liquibase:
-    change-log: classpath:db/changelog/db.changelog-master.yaml
-
 bucket4j:
   enabled: true
   cache-to-use: jcache
@@ -14,10 +8,10 @@ bucket4j:
       cache-name: todoReadBuckets
       strategy: first
       rate-limits:
-        - execute-condition: "getMethod() == 'GET'"
-          cache-key: "getRemoteAddr()"
+        - cache-key: "getHeader('Authorization')"
+          execute-condition: "getMethod() == 'GET'"
           bandwidths:
-            - capacity: 60
+            - capacity: 2
               time: 1
               unit: minutes
     - id: todo-write-rate-limit
@@ -26,12 +20,9 @@ bucket4j:
       cache-name: todoWriteBuckets
       strategy: first
       rate-limits:
-        - execute-condition: "getMethod() == 'POST' || getMethod() == 'PUT' || getMethod() == 'DELETE'"
-          cache-key: "getRemoteAddr()"
+        - cache-key: "getHeader('Authorization')"
+          execute-condition: "getMethod() == 'POST' || getMethod() == 'PUT' || getMethod() == 'DELETE'"
           bandwidths:
-            - capacity: 30
+            - capacity: 1
               time: 1
               unit: minutes
-
-jwt:
-  secret: ${JWT_SECRET:this-is-a-very-long-secret-key-for-testing-purposes}
